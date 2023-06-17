@@ -1,12 +1,5 @@
-import { App } from "@slack/bolt";
+import app from "./bolt-app";
 import Game from "./game";
-
-const app = new App({
-  token: process.env.SLACK_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
-});
 
 let currentGame: Game | undefined;
 
