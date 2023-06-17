@@ -4,32 +4,41 @@ import { getUserIdFromRawMention } from "./utils";
 
 let currentGame: Game | undefined;
 
-app.command('/start-game', async ({ command, ack, respond }) => {
+app.command("/start-game", async ({ command, ack, respond }) => {
   await ack();
 
   if (currentGame) {
-    await respond('A game is already in progress!');
+    await respond("A game is already in progress!");
     return;
   }
 
-  const playerIds = command.text.split(' ').map(getUserIdFromRawMention);
+  const playerIds = command.text.split(" ").map(getUserIdFromRawMention);
   currentGame = new Game(playerIds);
-  await respond(`Started a new game with ${playerIds.length} players!`);
+
+  app.client.chat.postMessage({
+    channel: "#assassins",
+    text: `A game of Assassins has started! Your current target has been sent to you in a DM.
+Players: ${playerIds.map((id) => `<@${id}>`).join(", ")}
+# players: ${playerIds.length}`,
+  });
+
+  // TODO: make #assassins actually link?
+  await respond(`Started a new game with ${playerIds.length} players! Check #assassins for updates.`);
 });
 
-app.command('/end-game', async ({ command, ack }) => {
+app.command("/end-game", async ({ command, ack }) => {
   await ack();
 
   console.log(command.command, command.text);
 });
 
-app.command('/kill', async ({ command, ack }) => {
+app.command("/kill", async ({ command, ack }) => {
   await ack();
 
   console.log(command.command, command.text);
 });
 
-app.command('/killed-by', async ({ command, ack }) => {
+app.command("/killed-by", async ({ command, ack }) => {
   await ack();
 
   console.log(command.command, command.text);
