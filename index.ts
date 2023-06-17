@@ -23,13 +23,29 @@ Players: ${playerIds.map((id) => `<@${id}>`).join(", ")}
   });
 
   // TODO: make #assassins actually link?
-  await respond(`Started a new game with ${playerIds.length} players! Check #assassins for updates.`);
+  await respond(
+    `Started a new game with ${playerIds.length} players! Check #assassins for updates.`
+  );
 });
 
-app.command("/end-game", async ({ command, ack }) => {
+app.command("/end-game", async ({ command, ack, respond }) => {
   await ack();
 
-  console.log(command.command, command.text);
+  // check password here
+  /*   if (!command.text.includes("")) {
+    await respond("You don't have permission to end the game!");
+  } */
+
+  if (currentGame) {
+    currentGame = undefined;
+    await respond("Ending the current game!");
+    app.client.chat.postMessage({
+      channel: "#assassins",
+      text: "The current game has been stopped by the admins.",
+    });
+  } else {
+    await respond("No game in progress!");
+  }
 });
 
 app.command("/kill", async ({ command, ack }) => {
