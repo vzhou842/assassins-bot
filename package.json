@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/vzhou842/assassins-bot/issues"
   },
-  "homepage": "https://github.com/vzhou842/assassins-bot#readme"
+  "homepage": "https://github.com/vzhou842/assassins-bot#readme",
+  "dependencies": {
+    "@slack/web-api": "^6.8.1"
+  }
 }
