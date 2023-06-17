@@ -1,5 +1,6 @@
 import app from "./bolt-app";
 import Game from "./game";
+import { getUserIdFromRawMention } from "./utils";
 
 let currentGame: Game | undefined;
 
@@ -11,7 +12,7 @@ app.command('/start-game', async ({ command, ack, respond }) => {
     return;
   }
 
-  const playerIds = command.text.split(' ');
+  const playerIds = command.text.split(' ').map(getUserIdFromRawMention);
   currentGame = new Game(playerIds);
   await respond(`Started a new game with ${playerIds.length} players!`);
 });
