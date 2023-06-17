@@ -7,8 +7,28 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN,
 });
 
-app.message('test', async ({ say }) => {
-  await say(`test`);
+app.command('/start-game', async ({ command, ack }) => {
+  await ack();
+
+  console.log(command.command, command.text);
+});
+
+app.command('/end-game', async ({ command, ack }) => {
+  await ack();
+
+  console.log(command.command, command.text);
+});
+
+app.command('/kill', async ({ command, ack }) => {
+  await ack();
+
+  console.log(command.command, command.text);
+});
+
+app.command('/killed-by', async ({ command, ack }) => {
+  await ack();
+
+  console.log(command.command, command.text);
 });
 
 (async () => {
