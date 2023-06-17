@@ -1,4 +1,5 @@
 import { App } from "@slack/bolt";
+import Game from "./game";
 
 const app = new App({
   token: process.env.SLACK_TOKEN,
@@ -7,10 +8,19 @@ const app = new App({
   appToken: process.env.SLACK_APP_TOKEN,
 });
 
-app.command('/start-game', async ({ command, ack }) => {
+let currentGame: Game | undefined;
+
+app.command('/start-game', async ({ command, ack, respond }) => {
   await ack();
 
-  console.log(command.command, command.text);
+  if (currentGame) {
+    await respond('A game is already in progress!');
+    return;
+  }
+
+  const playerIds = command.text.split(' ');
+  currentGame = new Game(playerIds);
+  await respond(`Started a new game with ${playerIds.length} players!`);
 });
 
 app.command('/end-game', async ({ command, ack }) => {
