@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,9 @@
     "@slack/web-api": "^6.8.1"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.59.11",
+    "@typescript-eslint/parser": "^5.59.11",
+    "eslint": "^8.43.0",
     "typescript": "^5.1.3"
   }
 }
