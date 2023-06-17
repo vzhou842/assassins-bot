@@ -1,15 +1,20 @@
-import { WebClient } from "@slack/web-api";
+import { App } from "@slack/bolt";
 
-const web = new WebClient(process.env.SLACK_TOKEN);
+const app = new App({
+  token: process.env.SLACK_TOKEN,
+  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  socketMode: true,
+  appToken: process.env.SLACK_APP_TOKEN,
+});
 
-async function postMessage(channel: string, text: string) {
-  try {
-    await web.chat.postMessage({
-      channel,
-      text,
-    });
-    console.log("Message posted!");
-  } catch (error) {
-    console.error(error);
-  }
-}
+app.message('test', async ({ say }) => {
+  await say(`test`);
+});
+
+(async () => {
+  // Start your app
+  const port = process.env.PORT || 3000;
+  await app.start(port);
+
+  console.log(`Running on port ${port}!`);
+})();
