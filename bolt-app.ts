@@ -8,3 +8,18 @@ const app = new App({
 });
 
 export default app;
+
+export function messagePlayer(playerId: string, text: string) {
+  return app.client.chat.postMessage({
+    channel: playerId,
+    text,
+  });
+}
+
+// Messages #assassins
+export function messageChannel(text: string) {
+  return app.client.chat.postMessage({
+    channel: "#assassins",
+    text,
+  });
+}

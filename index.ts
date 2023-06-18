@@ -1,4 +1,4 @@
-import app from "./bolt-app";
+import app, { messageChannel } from "./bolt-app";
 import Game from "./game";
 import { getUserIdFromRawMention } from "./utils";
 
@@ -14,13 +14,6 @@ app.command("/start-game", async ({ command, ack, respond }) => {
 
   const playerIds = command.text.split(" ").map(getUserIdFromRawMention);
   currentGame = new Game(playerIds);
-
-  app.client.chat.postMessage({
-    channel: "#assassins",
-    text: `A game of Assassins has started! Your current target has been sent to you in a DM.
-Players: ${playerIds.map((id) => `<@${id}>`).join(", ")}
-# players: ${playerIds.length}`,
-  });
 
   // TODO: make #assassins actually link?
   await respond(
@@ -48,10 +41,20 @@ app.command("/end-game", async ({ command, ack, respond }) => {
   }
 });
 
-app.command("/kill", async ({ command, ack }) => {
+app.command("/kill", async ({ command, ack, respond }) => {
   await ack();
 
-  console.log(command.command, command.text);
+  if (!currentGame) {
+    return respond("No active game!");
+  }
+
+  const target = getUserIdFromRawMention(command.text);
+
+  if (!target) {
+    return respond("Invalid target. Please @mention your target.");
+  }
+
+  respond(currentGame.kill(command.user_id, target));
 });
 
 app.command("/killed-by", async ({ command, ack }) => {
