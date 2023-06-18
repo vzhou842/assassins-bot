@@ -1,4 +1,4 @@
-import app, { messageChannel } from "./bolt-app";
+import app from "./bolt-app";
 import Game from "./game";
 import { getUserIdFromRawMention } from "./utils";
 
@@ -8,15 +8,19 @@ app.command("/start-game", async ({ command, ack, respond }) => {
   await ack();
 
   if (currentGame) {
-    await respond("A game is already in progress!");
-    return;
+    return respond("A game is already in progress!");
   }
 
-  const playerIds = command.text.split(" ").map(getUserIdFromRawMention);
+  const playerIds = command.text.split(" ").map(getUserIdFromRawMention).filter(Boolean);
+
+  if (playerIds.length < 3) {
+    return respond(`Only ${playerIds.length} valid players provided - minimum game size is 3!`);
+  }
+
   currentGame = new Game(playerIds);
 
   // TODO: make #assassins actually link?
-  await respond(
+  return respond(
     `Started a new game with ${playerIds.length} players! Check #assassins for updates.`
   );
 });
