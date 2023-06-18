@@ -1,11 +1,11 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
 
 export default class Game {
-  private currentTargetOrder: string[];
+  private readonly currentTargetOrder: string[];
 
-  constructor(private playerIds: string[]) {
+  constructor(private readonly playerIds: string[]) {
     // Assign targets by randomizing players
-    this.currentTargetOrder = playerIds.sort(() => Math.random() - 0.5);
+    this.currentTargetOrder = playerIds.slice().sort(() => Math.random() - 0.5);
 
     // DM everyone their initial target
     const numPlayers = playerIds.length;
@@ -39,10 +39,12 @@ export default class Game {
   private sendChannelGameUpdate() {
     messageChannel(
       `Players left: ${this.currentTargetOrder
+        .slice()
         .sort()
         .map((id) => `<@${id}>`)
         .join(", ")}
-# players left: ${this.currentTargetOrder.length}`
+# players left: ${this.currentTargetOrder.length}
+[DEBUG] The current order is: ${this.currentTargetOrder.map((id) => `<@${id}>`).join(" -> ")}`
     );
   }
 
