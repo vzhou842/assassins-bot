@@ -1,16 +1,16 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
 
 export default class Game {
-  private readonly currentTargetOrder: string[];
+  private readonly currentOrder: string[];
 
   constructor(private readonly playerIds: string[]) {
     // Assign targets by randomizing players
-    this.currentTargetOrder = playerIds.slice().sort(() => Math.random() - 0.5);
+    this.currentOrder = playerIds.slice().sort(() => Math.random() - 0.5);
 
     // DM everyone their initial target
     const numPlayers = playerIds.length;
     for (let i = 0; i < numPlayers; i++) {
-      const playerId = this.currentTargetOrder[i];
+      const playerId = this.currentOrder[i];
 
       messagePlayer(playerId, "A game of Assassins has begun!");
       this.sendTargetInfo(playerId);
@@ -24,11 +24,11 @@ export default class Game {
   }
 
   private getKillerIndex(index: number) {
-    return (index - 1) % this.currentTargetOrder.length;
+    return (index - 1) % this.currentOrder.length;
   }
 
   private getTargetIndex(index: number) {
-    return (index + 1) % this.currentTargetOrder.length;
+    return (index + 1) % this.currentOrder.length;
   }
 
   private sendChannelDeathUpdate(playerId: string) {
@@ -38,18 +38,18 @@ export default class Game {
 
   private sendChannelGameUpdate() {
     messageChannel(
-      `Players left: ${this.currentTargetOrder
+      `Players left: ${this.currentOrder
         .slice()
         .sort()
         .map((id) => `<@${id}>`)
         .join(", ")}
-# players left: ${this.currentTargetOrder.length}
-[DEBUG] The current order is: ${this.currentTargetOrder.map((id) => `<@${id}>`).join(" -> ")}`
+# players left: ${this.currentOrder.length}
+[DEBUG] The current order is: ${this.currentOrder.map((id) => `<@${id}>`).join(" -> ")}`
     );
   }
 
   private sendTargetInfo(playerId: string) {
-    const index = this.currentTargetOrder.indexOf(playerId);
+    const index = this.currentOrder.indexOf(playerId);
     if (index < 0) {
       console.error("Cannot send target info to player not in game!");
       return;
@@ -57,16 +57,16 @@ export default class Game {
 
     messagePlayer(
       playerId,
-      `Your current target is: <@${this.currentTargetOrder[this.getTargetIndex(index)]}>`
+      `Your current target is: <@${this.currentOrder[this.getTargetIndex(index)]}>`
     );
   }
 
   kill(killer: string, target: string): string {
-    const killerIndex = this.currentTargetOrder.indexOf(killer);
+    const killerIndex = this.currentOrder.indexOf(killer);
     if (killerIndex < 0) {
       return `<@${killer}> isn't part of the current game!`;
     }
-    const targetIndex = this.currentTargetOrder.indexOf(target);
+    const targetIndex = this.currentOrder.indexOf(target);
     if (targetIndex < 0) {
       return `<@${target}> isn't part of the current game!`;
     }
@@ -75,16 +75,16 @@ export default class Game {
       // Successful normal kill
       messagePlayer(target, `You were killed by your assassin <@${killer}>! GG`);
 
-      this.currentTargetOrder.splice(targetIndex, 1);
+      this.currentOrder.splice(targetIndex, 1);
 
       this.sendTargetInfo(killer);
       this.sendChannelDeathUpdate(target);
     } else if (this.getTargetIndex(targetIndex) === killerIndex) {
       // Successful anti-kill
       messagePlayer(target, `You were anti-killed by your target <@${killer}>! GG`);
-      const targetsKiller = this.currentTargetOrder[this.getKillerIndex(targetIndex)];
+      const targetsKiller = this.currentOrder[this.getKillerIndex(targetIndex)];
 
-      this.currentTargetOrder.splice(targetIndex, 1);
+      this.currentOrder.splice(targetIndex, 1);
 
       this.sendTargetInfo(targetsKiller);
       this.sendChannelDeathUpdate(target);
@@ -94,9 +94,9 @@ export default class Game {
         killer,
         `You attempted to kill <@${target}> who is neither your target nor your assassin! As a result, you are now dead ☠️ GG`
       );
-      const killersKiller = this.currentTargetOrder[this.getKillerIndex(killerIndex)];
+      const killersKiller = this.currentOrder[this.getKillerIndex(killerIndex)];
 
-      this.currentTargetOrder.splice(killerIndex, 1);
+      this.currentOrder.splice(killerIndex, 1);
 
       this.sendChannelDeathUpdate(killer);
       this.sendTargetInfo(killersKiller);
