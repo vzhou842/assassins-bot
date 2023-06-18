@@ -37,24 +37,38 @@ export default class Game {
   }
 
   private sendChannelGameUpdate() {
-    messageChannel(
-      `Players left: ${this.currentOrder
-        .slice()
-        .sort()
-        .map((id) => `<@${id}>`)
-        .join(", ")}
+    if (this.currentOrder.length === 2) {
+      const [a, b] = this.currentOrder;
+      messageChannel(
+        `Time for the FINAL SHOWDOWN! The last two remaining players are <@${a}> and <@${b}>. First player to shoot the other wins!`
+      );
+    } else {
+      messageChannel(
+        `Players left: ${this.currentOrder
+          .slice()
+          .sort()
+          .map((id) => `<@${id}>`)
+          .join(", ")}
 # players left: ${this.currentOrder.length}
 [DEBUG] The current order is: ${this.currentOrder.map((id) => `<@${id}>`).join(" -> ")}`
-    );
+      );
+    }
   }
 
   private sendTargetInfo(playerId: string) {
+    // If only 1 player is left, they already won
+    if (this.currentOrder.length === 1) {
+      return;
+    }
+
+    // Find this player's index
     const index = this.currentOrder.indexOf(playerId);
     if (index < 0) {
       console.error("Cannot send target info to player not in game!");
       return;
     }
 
+    // Send them their target
     messagePlayer(
       playerId,
       `Your current target is: <@${this.currentOrder[this.getTargetIndex(index)]}>`
@@ -102,7 +116,15 @@ export default class Game {
       this.sendTargetInfo(killersKiller);
     }
 
-    this.sendChannelGameUpdate();
+    if (this.currentOrder.length === 1) {
+      const [winner] = this.currentOrder;
+      messageChannel(`GAME OVER - <@${winner}> wins!!!`);
+      messagePlayer(winner, "Congratulations on winning Assassins!");
+
+      // TODO: send analytics
+    } else {
+      this.sendChannelGameUpdate();
+    }
 
     return "Kill logged!";
   }
