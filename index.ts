@@ -47,13 +47,11 @@ app.command("/end-game", async ({ command, ack, respond }) => {
 
 app.command("/kill", async ({ command, ack, respond }) => {
   await ack();
-
   if (!currentGame) {
     return respond("No active game!");
   }
 
   const target = getUserIdFromRawMention(command.text);
-
   if (!target) {
     return respond("Invalid target. Please @mention your target.");
   }
@@ -61,10 +59,18 @@ app.command("/kill", async ({ command, ack, respond }) => {
   respond(currentGame.kill(command.user_id, target));
 });
 
-app.command("/killed-by", async ({ command, ack }) => {
+app.command("/killed-by", async ({ command, ack, respond }) => {
   await ack();
+  if (!currentGame) {
+    return respond("No active game!");
+  }
 
-  console.log(command.command, command.text);
+  const killer = getUserIdFromRawMention(command.text);
+  if (!killer) {
+    return respond("Invalid killer. Please @mention the killer.");
+  }
+
+  respond(currentGame.kill(killer, command.user_id));
 });
 
 (async () => {
