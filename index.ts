@@ -31,10 +31,10 @@ Players: ${playerIds.map((id) => `<@${id}>`).join(", ")}
 app.command("/end-game", async ({ command, ack, respond }) => {
   await ack();
 
-  // check password here
-  /*   if (!command.text.includes("")) {
+  if (command.text !== process.env.ADMIN_PASSWORD) {
     await respond("You don't have permission to end the game!");
-  } */
+    return;
+  }
 
   if (currentGame) {
     currentGame = undefined;
