@@ -47,7 +47,7 @@ export default class Game {
   }
 
   private sendTargetInfo(playerId: string) {
-    const index = this.playerIds.indexOf(playerId);
+    const index = this.currentTargetOrder.indexOf(playerId);
     if (index < 0) {
       console.error("Cannot send target info to player not in game!");
       return;
@@ -60,39 +60,44 @@ export default class Game {
   }
 
   kill(killer: string, target: string): string {
-    const killerIndex = this.playerIds.indexOf(killer);
+    const killerIndex = this.currentTargetOrder.indexOf(killer);
     if (killerIndex < 0) {
       return `<@${killer}> isn't part of the current game!`;
     }
-    const targetIndex = this.playerIds.indexOf(target);
+    const targetIndex = this.currentTargetOrder.indexOf(target);
     if (targetIndex < 0) {
       return `<@${target}> isn't part of the current game!`;
     }
 
     if (this.getTargetIndex(killerIndex) === targetIndex) {
       // Successful normal kill
-      this.currentTargetOrder.splice(targetIndex, 1);
-      this.sendTargetInfo(killer);
       messagePlayer(target, `You were killed by your assassin <@${killer}>! GG`);
+
+      this.currentTargetOrder.splice(targetIndex, 1);
+
+      this.sendTargetInfo(killer);
       this.sendChannelDeathUpdate(target);
     } else if (this.getTargetIndex(targetIndex) === killerIndex) {
       // Successful anti-kill
-      this.currentTargetOrder.splice(targetIndex, 1);
-      const targetsKiller = this.getKillerIndex(targetIndex);
-      this.sendTargetInfo(this.playerIds[targetsKiller]);
       messagePlayer(target, `You were anti-killed by your target <@${killer}>! GG`);
+      const targetsKiller = this.currentTargetOrder[this.getKillerIndex(targetIndex)];
+
+      this.currentTargetOrder.splice(targetIndex, 1);
+
+      this.sendTargetInfo(targetsKiller);
       this.sendChannelDeathUpdate(target);
     } else {
       // Failed kill
-      this.currentTargetOrder.splice(killerIndex, 1);
       messagePlayer(
         killer,
         `You attempted to kill <@${target}> who is neither your target nor your assassin! As a result, you are now dead ☠️ GG`
       );
-      this.sendChannelDeathUpdate(killer);
+      const killersKiller = this.currentTargetOrder[this.getKillerIndex(killerIndex)];
 
-      const killersKiller = this.getKillerIndex(killerIndex);
-      this.sendTargetInfo(this.playerIds[killersKiller]);
+      this.currentTargetOrder.splice(killerIndex, 1);
+
+      this.sendChannelDeathUpdate(killer);
+      this.sendTargetInfo(killersKiller);
     }
 
     this.sendChannelGameUpdate();
