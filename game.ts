@@ -85,6 +85,8 @@ export default class Game {
       return `<@${target}> isn't part of the current game!`;
     }
 
+    let response = `Kill logged: <@${killer}> killed <@${target}>`;
+
     if (this.getTargetIndex(killerIndex) === targetIndex) {
       // Successful normal kill
       messagePlayer(target, `You were killed by your assassin <@${killer}>! GG`);
@@ -114,6 +116,8 @@ export default class Game {
 
       this.sendChannelDeathUpdate(killer);
       this.sendTargetInfo(killersKiller);
+
+      response = `Kill attempt logged: <@${killer}> attempted to kill <@${target}>`;
     }
 
     if (this.currentOrder.length === 1) {
@@ -126,6 +130,6 @@ export default class Game {
       this.sendChannelGameUpdate();
     }
 
-    return "Kill logged!";
+    return response;
   }
 }
