@@ -11,10 +11,15 @@ app.command("/start-game", async ({ command, ack, respond }) => {
     return respond("A game is already in progress!");
   }
 
-  const playerIds = command.text.split(" ").map(getUserIdFromRawMention).filter(Boolean);
+  const playerIds = command.text
+    .split(" ")
+    .map(getUserIdFromRawMention)
+    .filter(Boolean);
 
   if (playerIds.length < 3) {
-    return respond(`Only ${playerIds.length} valid players provided - minimum game size is 3!`);
+    return respond(
+      `Only ${playerIds.length} valid players provided - minimum game size is 3!`
+    );
   }
 
   currentGame = new Game(playerIds);
@@ -57,20 +62,6 @@ app.command("/kill", async ({ command, ack, respond }) => {
   }
 
   respond(currentGame.kill(command.user_id, target));
-});
-
-app.command("/killed-by", async ({ command, ack, respond }) => {
-  await ack();
-  if (!currentGame) {
-    return respond("No active game!");
-  }
-
-  const killer = getUserIdFromRawMention(command.text);
-  if (!killer) {
-    return respond("Invalid killer. Please @mention the killer.");
-  }
-
-  respond(currentGame.kill(killer, command.user_id));
 });
 
 (async () => {
