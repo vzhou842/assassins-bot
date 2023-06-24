@@ -1,4 +1,5 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
+import { pickBy } from "ramda";
 
 interface PlayerStats {
   kills: number;
@@ -91,6 +92,7 @@ export default class Game {
     const playerStats = this.stats[playerId];
     if (playerStats) {
       playerStats.kills++;
+      messageChannel(`[DEBUG] Stats: ${JSON.stringify(this.stats, null, 2)}`);
     }
   }
 
@@ -142,15 +144,29 @@ export default class Game {
     }
 
     if (this.currentOrder.length === 1) {
-      const [winner] = this.currentOrder;
-      messageChannel(`GAME OVER - <@${winner}> wins!!!`);
-      messagePlayer(winner, "Congratulations on winning Assassins!");
-
-      // TODO: send analytics
+      this.handleGameOver();
     } else {
       this.sendChannelGameUpdate();
     }
 
     return response;
+  }
+
+  private handleGameOver() {
+    const [winner] = this.currentOrder;
+    messagePlayer(winner, "Congratulations on winning Assassins!");
+    messageChannel(`GAME OVER - <@${winner}> wins!!!`);
+
+    // Kills leaderboard
+    const killers: Record<string, PlayerStats> = pickBy(({ kills }) => kills > 0, this.stats);
+    const leaderboard = Object.entries(killers).sort(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      ([_a, { kills: killsA }], [_b, { kills: killsB }]) => killsB - killsA
+    );
+    messageChannel(
+      `☠️ Kills Leaderboard ☠️\n${leaderboard
+        .map(([playerId, { kills }], index) => `${index + 1}. <@${playerId}>: ${kills} kills`)
+        .join("\n")}`
+    );
   }
 }
