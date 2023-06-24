@@ -1,7 +1,12 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
 
+interface PlayerStats {
+  kills: number;
+}
+
 export default class Game {
   private readonly currentOrder: string[];
+  private stats: { [id: string]: PlayerStats } = {};
 
   constructor(private readonly playerIds: string[]) {
     // Assign targets by randomizing players
@@ -15,6 +20,13 @@ export default class Game {
       messagePlayer(playerId, "A game of Assassins has begun!");
       this.sendTargetInfo(playerId);
     }
+
+    // Init stats for everyone
+    this.currentOrder.forEach((playerId) => {
+      this.stats[playerId] = {
+        kills: 0,
+      };
+    });
 
     // Send channel start messages
     messageChannel(
@@ -75,6 +87,13 @@ export default class Game {
     );
   }
 
+  private logKillStat(playerId: string) {
+    const playerStats = this.stats[playerId];
+    if (playerStats) {
+      playerStats.kills++;
+    }
+  }
+
   kill(killer: string, target: string): string {
     const killerIndex = this.currentOrder.indexOf(killer);
     if (killerIndex < 0) {
@@ -89,6 +108,7 @@ export default class Game {
 
     if (this.getTargetIndex(killerIndex) === targetIndex) {
       // Successful normal kill
+      this.logKillStat(killer);
       messagePlayer(target, `You were killed by your assassin <@${killer}>! GG`);
 
       this.currentOrder.splice(targetIndex, 1);
@@ -97,6 +117,7 @@ export default class Game {
       this.sendChannelDeathUpdate(target);
     } else if (this.getTargetIndex(targetIndex) === killerIndex) {
       // Successful anti-kill
+      this.logKillStat(killer);
       messagePlayer(target, `You were anti-killed by your target <@${killer}>! GG`);
       const targetsKiller = this.currentOrder[this.getKillerIndex(targetIndex)];
 
