@@ -64,6 +64,30 @@ app.command("/kill", async ({ command, ack, respond }) => {
   respond(currentGame.kill(command.user_id, target));
 });
 
+app.command("/admin-kill", async ({ command, ack, respond }) => {
+  await ack();
+
+  const { text } = command;
+  const words = text.split(" ");
+
+  if (words.length !== 3) {
+    return respond("Incorrect format");
+  }
+
+  if (words[0] !== process.env.ADMIN_PASSWORD) {
+    return respond("You don't have permission to do this!");
+  }
+
+  if (!currentGame) {
+    return respond("No active game!");
+  }
+
+  const killer = getUserIdFromRawMention(words[1]);
+  const target = getUserIdFromRawMention(words[2]);
+
+  respond(currentGame.kill(killer, target));
+});
+
 (async () => {
   // Start your app
   const port = process.env.PORT || 3000;
