@@ -32,9 +32,8 @@ export default class Game {
 
     // Send channel start messages
     messageChannel(
-      `A game of Assassins has started! Your current target has been sent to you in a DM.`
-    );
-    this.sendChannelGameUpdate();
+      `🔫🔫🔫 *A game of Assassins has started!* 🔫🔫🔫\n\nYour current target has been sent to you in a DM.`
+    ).then(() => this.sendChannelGameUpdate());
   }
 
   private getKillerIndex(index: number) {
@@ -159,10 +158,10 @@ export default class Game {
     return response;
   }
 
-  private handleGameOver() {
+  private async handleGameOver() {
     const [winner] = this.currentOrder;
     messagePlayer(winner, "Congratulations on winning Assassins!");
-    messageChannel(`GAME OVER - <@${winner}> wins!!!`);
+    await messageChannel(`🔫🔫🔫 *GAME OVER - <@${winner}> wins!!!* 🔫🔫🔫`);
 
     // Kills leaderboard
     const killers: Record<string, PlayerStats> = pickBy(({ kills }) => kills > 0, this.stats);
@@ -171,7 +170,7 @@ export default class Game {
       ([_a, { kills: killsA }], [_b, { kills: killsB }]) => killsB - killsA
     );
     messageChannel(
-      `☠️ Kills Leaderboard ☠️\n${leaderboard
+      `☠️ *Kills Leaderboard* ☠️\n${leaderboard
         .map(([playerId, { kills }], index) => `${index + 1}. <@${playerId}>: ${kills} kills`)
         .join("\n")}`
     );
