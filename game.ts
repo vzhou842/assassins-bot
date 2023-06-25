@@ -1,10 +1,33 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
 import { pickBy } from "ramda";
 import { IS_DEV } from "./settings";
+import { pickRandom } from "./utils";
 
 interface PlayerStats {
   kills: number;
 }
+
+const DEATH_EMOJIS = [
+  "🔫",
+  "✌️",
+  "👋",
+  "💀",
+  "😵",
+  "🪦",
+  "⽍",
+  "⚰️",
+  "👻",
+  "🌹",
+  "😢",
+  "😿",
+  "🫤",
+  "👼",
+  "⚱️",
+  "😮",
+  "😱",
+  "🙃",
+  "😬",
+];
 
 export default class Game {
   private readonly currentOrder: string[];
@@ -45,8 +68,37 @@ export default class Game {
   }
 
   private sendChannelDeathUpdate(playerId: string, killer: string) {
-    // TODO: fun variants
-    messageChannel(`<@${playerId}> was killed by <@${killer}>! 💀`);
+    const baseMessage = pickRandom([
+      `was killed by <@${killer}>!`,
+      `was shot by <@${killer}>!`,
+      `was assassinated by <@${killer}>!`,
+      `has been assassinated... and you can thank <@${killer}>`,
+      `was killed! Nice shot <@${killer}>`,
+      `was sent to the shadow realm by <@${killer}>!`,
+      `met their unfortunate fate at the hands of <@${killer}>`,
+      `met their demise thanks to <@${killer}>`,
+      `was taken out by <@${killer}>!`,
+      `hopes of claiming victory have been dashed by <@${killer}>!`,
+      `was ambushed by <@${killer}>!`,
+      `fell prey to the deadly precision of <@${killer}>!`,
+      `has been eliminated by <@${killer}>!`,
+      `had no room for escape from <@${killer}>! Nice shot`,
+      `has been terminated by <@${killer}>! Goodbye`,
+      `fell victim to <@${killer}>!`,
+    ]);
+
+    let emojiSuffix = "";
+    const numEmojis = Math.ceil(1 + Math.random() * 4);
+    for (let i = 0; i < numEmojis; i++) {
+      emojiSuffix += pickRandom(DEATH_EMOJIS);
+    }
+
+    messageChannel(`☠️ <@${playerId}> ${baseMessage} ${emojiSuffix}`);
+
+    // Debug mode - send extra death updates to test
+    if (IS_DEV && Math.random() < 0.66) {
+      this.sendChannelDeathUpdate(playerId, killer);
+    }
   }
 
   private sendChannelGameUpdate() {
