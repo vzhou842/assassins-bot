@@ -11,15 +11,10 @@ app.command("/start-game", async ({ command, ack, respond }) => {
     return respond("A game is already in progress!");
   }
 
-  const playerIds = command.text
-    .split(" ")
-    .map(getUserIdFromRawMention)
-    .filter(Boolean);
+  const playerIds = command.text.split(" ").map(getUserIdFromRawMention).filter(Boolean);
 
   if (playerIds.length < 3) {
-    return respond(
-      `Only ${playerIds.length} valid players provided - minimum game size is 3!`
-    );
+    return respond(`Only ${playerIds.length} valid players provided - minimum game size is 3!`);
   }
 
   currentGame = new Game(playerIds);
@@ -95,3 +90,11 @@ app.command("/admin-kill", async ({ command, ack, respond }) => {
 
   console.log(`Running on port ${port}!`);
 })();
+
+process
+  .on("unhandledRejection", (reason) => {
+    console.error("Ignoring unhandled promise rejection", reason);
+  })
+  .on("uncaughtException", (err) => {
+    console.error("Ignoring uncaught exception!", err);
+  });
