@@ -44,9 +44,9 @@ export default class Game {
     return (index + 1) % this.currentOrder.length;
   }
 
-  private sendChannelDeathUpdate(playerId: string) {
+  private sendChannelDeathUpdate(playerId: string, killer: string) {
     // TODO: fun variants
-    messageChannel(`<@${playerId}> died! 💀`);
+    messageChannel(`<@${playerId}> was killed by <@${killer}>! 💀`);
   }
 
   private sendChannelGameUpdate() {
@@ -96,9 +96,6 @@ export default class Game {
     const playerStats = this.stats[playerId];
     if (playerStats) {
       playerStats.kills++;
-      if (IS_DEV) {
-        messageChannel(`[DEBUG] Stats: ${JSON.stringify(this.stats, null, 2)}`);
-      }
     }
   }
 
@@ -122,7 +119,7 @@ export default class Game {
       this.currentOrder.splice(targetIndex, 1);
 
       this.sendTargetInfo(killer);
-      this.sendChannelDeathUpdate(target);
+      this.sendChannelDeathUpdate(target, killer);
     } else if (this.getTargetIndex(targetIndex) === killerIndex) {
       // Successful anti-kill
       this.logKillStat(killer);
@@ -132,7 +129,7 @@ export default class Game {
       this.currentOrder.splice(targetIndex, 1);
 
       this.sendTargetInfo(targetsKiller);
-      this.sendChannelDeathUpdate(target);
+      this.sendChannelDeathUpdate(target, killer);
     } else {
       // Failed kill
       messagePlayer(
@@ -143,7 +140,7 @@ export default class Game {
 
       this.currentOrder.splice(killerIndex, 1);
 
-      this.sendChannelDeathUpdate(killer);
+      messageChannel(`<@${killer}> died due to an invalid kill attempt on <@${target}>! Oops 😬`);
       this.sendTargetInfo(killersKiller);
 
       response = `Kill attempt logged: <@${killer}> attempted to kill <@${target}>`;
