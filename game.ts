@@ -1,5 +1,6 @@
 import { messageChannel, messagePlayer } from "./bolt-app";
 import { pickBy } from "ramda";
+import { IS_DEV } from "./settings";
 
 interface PlayerStats {
   kills: number;
@@ -62,9 +63,13 @@ export default class Game {
           .sort()
           .map((id) => `<@${id}>`)
           .join(", ")}
-# players left: ${this.currentOrder.length}
-[DEBUG] The current order is: ${this.currentOrder.map((id) => `<@${id}>`).join(" -> ")}`
+# players left: ${this.currentOrder.length}`
       );
+      if (IS_DEV) {
+        messageChannel(
+          `[DEBUG] The current order is: ${this.currentOrder.map((id) => `<@${id}>`).join(" -> ")}`
+        );
+      }
     }
   }
 
@@ -92,7 +97,9 @@ export default class Game {
     const playerStats = this.stats[playerId];
     if (playerStats) {
       playerStats.kills++;
-      messageChannel(`[DEBUG] Stats: ${JSON.stringify(this.stats, null, 2)}`);
+      if (IS_DEV) {
+        messageChannel(`[DEBUG] Stats: ${JSON.stringify(this.stats, null, 2)}`);
+      }
     }
   }
 
