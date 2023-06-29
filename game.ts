@@ -33,7 +33,7 @@ export default class Game {
   private readonly currentOrder: string[];
   private stats: { [id: string]: PlayerStats } = {};
 
-  constructor(private readonly playerIds: string[]) {
+  constructor(readonly playerIds: string[], private readonly onGameOver: VoidFunction) {
     // Assign targets by randomizing players
     this.currentOrder = playerIds.slice().sort(() => Math.random() - 0.5);
 
@@ -223,5 +223,7 @@ export default class Game {
         .map(([playerId, { kills }], index) => `${index + 1}. <@${playerId}>: ${kills} kills`)
         .join("\n")}`
     );
+
+    this.onGameOver();
   }
 }

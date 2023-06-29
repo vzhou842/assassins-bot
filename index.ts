@@ -17,7 +17,9 @@ app.command("/start-game", async ({ command, ack, respond }) => {
     return respond(`Only ${playerIds.length} valid players provided - minimum game size is 3!`);
   }
 
-  currentGame = new Game(playerIds);
+  currentGame = new Game(playerIds, () => {
+    currentGame = null;
+  });
 
   // TODO: make #assassins actually link?
   return respond(
