@@ -11,7 +11,13 @@ app.command("/start-game", async ({ command, ack, respond }) => {
     return respond("A game is already in progress!");
   }
 
-  const playerIds = command.text.split(" ").map(getUserIdFromRawMention).filter(Boolean);
+  const [password, ...rawPlayerIds] = command.text.split(" ");
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return respond("You don't have permission to do this!");
+  }
+
+  const playerIds = rawPlayerIds.map(getUserIdFromRawMention).filter(Boolean);
 
   if (playerIds.length < 3) {
     return respond(`Only ${playerIds.length} valid players provided - minimum game size is 3!`);
